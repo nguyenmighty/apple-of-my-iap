@@ -2,7 +2,7 @@ package com.meetup.iap.receipt
 
 import com.meetup.iap.AppleApi
 import com.meetup.iap.Plan
-import AppleApi.{ReceiptResponse, ReceiptInfo}
+import AppleApi.{FullReceiptInfo, ReceiptInfo, ReceiptResponse}
 import org.joda.time.{DateTime, Period}
 
 object ReceiptGenerator {
@@ -23,7 +23,7 @@ object ReceiptGenerator {
   }
 
   def apply(plan: Plan,
-            receiptOrSub: Either[String, Subscription] ): (String, ReceiptInfo) = {
+            receiptOrSub: Either[String, Subscription] ): (String, ReceiptInfo, FullReceiptInfo) = {
 
     val purchaseDateTime = new DateTime()
     val purchaseDate = purchaseDateTime.toDate
@@ -40,21 +40,37 @@ object ReceiptGenerator {
         val id = subscription.receiptsList.size
         (orig.purchaseDate, orig.transactionId, f"$origReceipt-${id}%03d")
     }
+    val receiptInfo = ReceiptInfo(
+      origPurchaseDate,
+      origTransId,
+      transactionId,
+      purchaseDate,
+      expiresDate,
+      productId,
+      cancellationDate = None,
+      isTrialPeriod = false,
+      quantity = 1)
 
-    (receiptToken, ReceiptInfo(
-                    origPurchaseDate,
-                    origTransId,
-                    transactionId,
-                    purchaseDate,
-                    expiresDate,
-                    productId,
-                    cancellationDate = None,
-                    isTrialPeriod = false,
-                    quantity = 1))
+    val fullReceiptInfo = FullReceiptInfo(
+      "Mock Enviroment",
+      plan.adamId,
+      plan.appItemId,
+      plan.bundleId,
+      plan.applicationVersion,
+      1,
+      plan.versionExternalIdentifier,
+      purchaseDate,
+      purchaseDate,
+      plan.originalApplicationVersion,
+      transactionId
+    )
+
+    (receiptToken, receiptInfo, fullReceiptInfo)
   }
 
   def apply(sub: Subscription): ReceiptResponse = {
     ReceiptResponse(
+      sub.fullReceiptInfo,
       sub.latestReceiptToken,
       sub.receiptsList,
       sub.status)

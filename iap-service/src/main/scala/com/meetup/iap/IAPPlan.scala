@@ -28,7 +28,7 @@ object IAPPlan {
       json \ "productId" match {
         case JString(id) => Some(id)
         case _ => None
-    }
+      }
 
     getOrBad(productId)
   }
@@ -38,11 +38,11 @@ object IAPPlan {
   }
 
   private def getStatusCode(json: JValue) = {
-    val statusCode: Option[Int] = 
+    val statusCode: Option[Int] =
       json \ "status" match {
         case JString(id) => Try(id.toInt).toOption
         case JInt(id) => Some(id.toInt)
-        case _ => None 
+        case _ => None
       }
 
     getOrBad(statusCode)
@@ -61,9 +61,9 @@ object IAPPlan {
     case GET(Path("/")) => Directives.success(page)
 
     case GET(Path("/plans")) => Directives.success {
-        val json = pretty(render(
-          Biller.plans.map { plan =>
-            ("productId" -> plan.productId) ~
+      val json = pretty(render(
+        Biller.plans.map { plan =>
+          ("productId" -> plan.productId) ~
             ("name" -> plan.name) ~
             ("description" -> plan.description)
         }))
@@ -148,7 +148,7 @@ object IAPPlan {
           ReceiptRenderer(ReceiptGenerator(sub))
         }.getOrElse {
           log.info(s"Failed to find receipt: $receipt, returning BadReceipt.")
-          ReceiptRenderer(ReceiptResponse(statusCode = UnauthorizedReceipt.code))
+          ReceiptRenderer(ReceiptResponse(receipt = null, statusCode = UnauthorizedReceipt.code))
         }
 
         JsonContent ~> ResponseString(response)

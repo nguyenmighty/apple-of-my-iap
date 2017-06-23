@@ -3,8 +3,7 @@ package com.meetup.iap.receipt
 import java.text.SimpleDateFormat
 
 import com.meetup.iap.AppleApi
-import AppleApi.{ReceiptResponse, ReceiptInfo}
-
+import AppleApi.{FullReceiptInfo, ReceiptInfo, ReceiptResponse}
 import java.util.{Date, TimeZone}
 
 import org.json4s.JsonDSL._
@@ -22,10 +21,29 @@ object ReceiptRenderer {
   }
 
   def apply(response: ReceiptResponse): String = {
+    val latest_receipt_info = response.latestReceiptInfo.reverse.map(renderReceipt)
+
     pretty(render(
       ("status" -> response.statusCode) ~
-        ("latest_receipt_info" -> response.latestReceiptInfo.reverse.map(renderReceipt)) ~
-        ("latest_receipt" -> response.latestReceipt)))
+        ("receipt" -> renderFullReceipt(latest_receipt_info, response.receipt)) ~
+        ("latest_receipt_info" -> latest_receipt_info) ~
+        ("latest_receipt" -> response.latestReceipt))
+    )
+  }
+
+  private def renderFullReceipt(latestReceiptInfo: List[JValue], receipt: FullReceiptInfo): JValue = {
+    ("receiptType" -> receipt.receiptType) ~
+      ("adamId" -> receipt.adamId) ~
+      ("appItemId" -> receipt.appItemId) ~
+      ("bundleId" -> receipt.bundleId) ~
+      ("applicationVersion" -> receipt.applicationVersion) ~
+      ("downloadId" -> receipt.downloadId) ~
+      ("versionExternalIdentifier" -> receipt.versionExternalIdentifier) ~
+      ("requestDate" -> receipt.requestDate.toString) ~
+      ("originalPurchaseDate" -> receipt.originalPurchaseDate.toString) ~
+      ("originalApplicationVersion" -> receipt.originalApplicationVersion) ~
+      ("originalTransactionId" -> receipt.originalTransactionId) ~
+      ("inApp" -> latestReceiptInfo)
   }
 
   private def renderReceipt(receiptInfo: ReceiptInfo): JValue = {

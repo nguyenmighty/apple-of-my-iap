@@ -9,8 +9,8 @@ import org.json4s.native.Serialization.read
 import java.text.SimpleDateFormat
 
 /**
- * Handles requests to apple's verify services and parsing of response.
- */
+  * Handles requests to apple's verify services and parsing of response.
+  */
 object AppleApi {
 
   implicit def formats = new DefaultFormats {
@@ -22,14 +22,16 @@ object AppleApi {
   }
 
   /**
-   * @param receipt Actual receipt info for the request receipt (original)
-   * @param latestReceipt Latest receipt charged in a subscription.
-   * @param latestExpiredReceiptInfo Latest receipt charged in an expired subscription.
-   */
+    * @param receipt Actual receipt info for the request receipt (original)
+    * @param latestReceipt Latest receipt charged in a subscription.
+    * @param latestReceiptInfo List[ReceiptInfo] receipt charged in an expired subscription.
+    * @param statusCode Int receipt charged in an expired subscription.
+    */
   case class ReceiptResponse(
-    latestReceipt: Option[String] = None,
-    latestReceiptInfo: List[ReceiptInfo] = List.empty,
-    statusCode: Int = 0) {
+                              receipt: FullReceiptInfo,
+                              latestReceipt: Option[String] = None,
+                              latestReceiptInfo: List[ReceiptInfo] = List.empty,
+                              statusCode: Int = 0) {
     val latestInfo: Option[ReceiptInfo] = latestReceiptInfo.reverse.headOption
   }
 
@@ -46,32 +48,46 @@ object AppleApi {
     * @param status status of the iTunes customer
     */
   private case class AppleReceiptResponse(
-    latestReceipt: Option[String],
-    latestReceiptInfo: List[AppleReceiptInfo],
-    status: Int)
+                                           receipt: FullReceiptInfo,
+                                           latestReceipt: Option[String],
+                                           latestReceiptInfo: List[AppleReceiptInfo],
+                                           status: Int)
 
 
   case class ReceiptInfo(
-    originalPurchaseDate: Date,
-    originalTransactionId: String,
-    transactionId: String,
-    purchaseDate: Date,
-    expiresDate: Date,
-    productId: String,
-    isTrialPeriod: Boolean,
-    cancellationDate: Option[Date],
-    quantity: Int)
+                          originalPurchaseDate: Date,
+                          originalTransactionId: String,
+                          transactionId: String,
+                          purchaseDate: Date,
+                          expiresDate: Date,
+                          productId: String,
+                          isTrialPeriod: Boolean,
+                          cancellationDate: Option[Date],
+                          quantity: Int)
+
+  case class FullReceiptInfo(
+                              receiptType: String,
+                              adamId: Int,
+                              appItemId: Int,
+                              bundleId: String,
+                              applicationVersion: String,
+                              downloadId: Int,
+                              versionExternalIdentifier: Int,
+                              requestDate: Date,
+                              originalPurchaseDate: Date,
+                              originalApplicationVersion: String,
+                              originalTransactionId: String)
 
   private case class AppleReceiptInfo(
-    originalPurchaseDate: Date,
-    originalTransactionId: String,
-    transactionId: String,
-    purchaseDate: Date,
-    expiresDate: Date,
-    productId: String,
-    isTrialPeriod: String,
-    cancellationDate: Option[Date] = None,
-    quantity: String)
+                                       originalPurchaseDate: Date,
+                                       originalTransactionId: String,
+                                       transactionId: String,
+                                       purchaseDate: Date,
+                                       expiresDate: Date,
+                                       productId: String,
+                                       isTrialPeriod: String,
+                                       cancellationDate: Option[Date] = None,
+                                       quantity: String)
 
   def parseResponse(json: String): ReceiptResponse = {
     val appleResponse = parseAppleResponse(json)
@@ -80,6 +96,7 @@ object AppleApi {
 
   private def convertAppleReceiptResponse(appleReceiptResponse: AppleReceiptResponse): ReceiptResponse = {
     ReceiptResponse(
+      receipt = appleReceiptResponse.receipt,
       latestReceipt = appleReceiptResponse.latestReceipt,
       latestReceiptInfo = appleReceiptResponse.latestReceiptInfo.map(convertAppleReceiptInfo),
       statusCode = appleReceiptResponse.status

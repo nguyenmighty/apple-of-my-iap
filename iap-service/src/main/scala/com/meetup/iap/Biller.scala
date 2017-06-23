@@ -9,13 +9,19 @@ import scala.collection.JavaConverters._
 import com.meetup.iap.AppleApi.ReceiptInfo
 
 case class Plan(
-    name: String,
-    description: String,
-    billInterval: Int,
-    billIntervalUnit: String,
-    trialInterval: Int,
-    trialIntervalUnit: String,
-    productId: String)
+                 name: String,
+                 description: String,
+                 billInterval: Int,
+                 billIntervalUnit: String,
+                 trialInterval: Int,
+                 trialIntervalUnit: String,
+                 productId: String,
+                 bundleId: String,
+                 adamId: Int,
+                 appItemId: Int,
+                 applicationVersion: String,
+                 versionExternalIdentifier: Int,
+                 originalApplicationVersion: String)
 
 object Biller {
   val log = LoggerFactory.getLogger(Biller.getClass)
@@ -33,8 +39,8 @@ object Biller {
 
   def createSub(plan: Plan): Subscription = {
     val receiptEncoding = ReceiptGenerator.genEncoding(plan, subscriptions.keySet)
-    val (_, receiptInfo) = ReceiptGenerator(plan, Left(receiptEncoding))
-    val sub = Subscription(receiptEncoding, receiptInfo)
+    val (_, receiptInfo, fullReceiptInfo) = ReceiptGenerator(plan, Left(receiptEncoding))
+    val sub = Subscription(receiptEncoding, receiptInfo, fullReceiptInfo)
 
     _subscriptions.put(receiptEncoding, sub)
     BillerCache.writeToCache(subscriptions)
@@ -48,10 +54,10 @@ object Biller {
 
   def renewSub(sub: Subscription) {
     plansByProductId.get(sub.latestReceiptInfo.productId).map { plan =>
-      val (latestReceiptToken, latestReceiptInfo) = ReceiptGenerator(plan, Right(sub))
+      val (latestReceiptToken, latestReceiptInfo, fullReceiptInfo) = ReceiptGenerator(plan, Right(sub))
       val updatedSub = sub.addReceipt(latestReceiptInfo, latestReceiptToken)
       _subscriptions.put(sub.receiptToken, updatedSub)
-	
+
       BillerCache.writeToCache(subscriptions)
     }
   }
@@ -73,7 +79,7 @@ object Biller {
   }
 
   def shutdown() = {
-//    LocalTimer.shutdown()
+    //    LocalTimer.shutdown()
     BillerCache.writeToCache(subscriptions)
   }
 
@@ -83,7 +89,7 @@ object Biller {
     plans
   }
 
-//  LocalTimer.repeat(Period.seconds(10)) {
-//    log.debug("doing stuff.")
-//  }
+  //  LocalTimer.repeat(Period.seconds(10)) {
+  //    log.debug("doing stuff.")
+  //  }
 }
