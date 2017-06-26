@@ -20,6 +20,12 @@ object ReceiptRenderer {
     sdf.format(date)
   }
 
+  private def appleDateFormatPST(date: Date): String = {
+    val sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss 'America/Los_Angeles'")
+    sdf.setTimeZone(TimeZone.getTimeZone("PST"))
+    sdf.format(date)
+  }
+
   def apply(response: ReceiptResponse): String = {
     val latest_receipt_info = response.latestReceiptInfo.reverse.map(renderReceipt)
 
@@ -32,6 +38,21 @@ object ReceiptRenderer {
   }
 
   private def renderFullReceipt(latestReceiptInfo: List[JValue], receipt: FullReceiptInfo): JValue = {
+    val requestDate = receipt.requestDate
+    val requestDateStr = appleDateFormat(requestDate)
+    val requestDatePSTStr = appleDateFormatPST(requestDate)
+    val requestDateMs = requestDate.getTime
+
+    val receiptCreationDate = receipt.receiptCreationDate
+    val receiptCreationDateStr = appleDateFormat(receiptCreationDate)
+    val receiptCreationDatePSTStr = appleDateFormatPST(receiptCreationDate)
+    val receiptCreationDateMs = receiptCreationDate.getTime
+
+    val origPurchaseDate = receipt.originalPurchaseDate
+    val origPurchaseDateStr = appleDateFormat(origPurchaseDate)
+    val origPurchaseDatePSTStr = appleDateFormatPST(origPurchaseDate)
+    val origPurchaseDateMs = origPurchaseDate.getTime
+
     ("receipt_type" -> receipt.receiptType) ~
       ("adam_id" -> receipt.adamId) ~
       ("app_item_id" -> receipt.appItemId) ~
@@ -39,8 +60,15 @@ object ReceiptRenderer {
       ("application_version" -> receipt.applicationVersion) ~
       ("download_id" -> receipt.downloadId) ~
       ("versionExternal_identifier" -> receipt.versionExternalIdentifier) ~
-      ("request_date" -> receipt.requestDate.toString) ~
-      ("original_purchase_date" -> receipt.originalPurchaseDate.toString) ~
+      ("request_date" -> requestDateStr) ~
+      ("request_date_ms" -> requestDateMs) ~
+      ("request_date_pst" -> requestDatePSTStr) ~
+      ("receipt_creation_date" -> receiptCreationDateStr) ~
+      ("receipt_creation_date_ms" -> receiptCreationDateMs.toString) ~
+      ("receipt_creation_date_pst" -> receiptCreationDatePSTStr) ~
+      ("original_purchase_date" -> origPurchaseDateStr) ~
+      ("original_purchase_date_ms" -> origPurchaseDateMs) ~
+      ("original_purchase_date_pst" -> origPurchaseDatePSTStr) ~
       ("original_application_version" -> receipt.originalApplicationVersion) ~
       ("original_transaction_id" -> receipt.originalTransactionId) ~
       ("in_app" -> latestReceiptInfo)

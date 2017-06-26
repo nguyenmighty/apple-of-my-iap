@@ -61,6 +61,7 @@ object ReceiptGenerator {
       plan.versionExternalIdentifier,
       purchaseDate,
       purchaseDate,
+      purchaseDate,
       plan.originalApplicationVersion,
       transactionId
     )

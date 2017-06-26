@@ -74,6 +74,7 @@ object AppleApi {
                               downloadId: Int,
                               versionExternalIdentifier: Int,
                               requestDate: Date,
+                              receiptCreationDate: Date,
                               originalPurchaseDate: Date,
                               originalApplicationVersion: String,
                               originalTransactionId: String)
