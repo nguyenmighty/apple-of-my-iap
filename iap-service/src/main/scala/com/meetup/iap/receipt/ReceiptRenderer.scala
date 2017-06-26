@@ -32,18 +32,18 @@ object ReceiptRenderer {
   }
 
   private def renderFullReceipt(latestReceiptInfo: List[JValue], receipt: FullReceiptInfo): JValue = {
-    ("receiptType" -> receipt.receiptType) ~
-      ("adamId" -> receipt.adamId) ~
-      ("appItemId" -> receipt.appItemId) ~
-      ("bundleId" -> receipt.bundleId) ~
-      ("applicationVersion" -> receipt.applicationVersion) ~
-      ("downloadId" -> receipt.downloadId) ~
-      ("versionExternalIdentifier" -> receipt.versionExternalIdentifier) ~
-      ("requestDate" -> receipt.requestDate.toString) ~
-      ("originalPurchaseDate" -> receipt.originalPurchaseDate.toString) ~
-      ("originalApplicationVersion" -> receipt.originalApplicationVersion) ~
-      ("originalTransactionId" -> receipt.originalTransactionId) ~
-      ("inApp" -> latestReceiptInfo)
+    ("receipt_type" -> receipt.receiptType) ~
+      ("adam_id" -> receipt.adamId) ~
+      ("app_item_id" -> receipt.appItemId) ~
+      ("bundle_id" -> receipt.bundleId) ~
+      ("application_version" -> receipt.applicationVersion) ~
+      ("download_id" -> receipt.downloadId) ~
+      ("versionExternal_identifier" -> receipt.versionExternalIdentifier) ~
+      ("request_date" -> receipt.requestDate.toString) ~
+      ("original_purchase_date" -> receipt.originalPurchaseDate.toString) ~
+      ("original_application_version" -> receipt.originalApplicationVersion) ~
+      ("original_transaction_id" -> receipt.originalTransactionId) ~
+      ("in_app" -> latestReceiptInfo)
   }
 
   private def renderReceipt(receiptInfo: ReceiptInfo): JValue = {
